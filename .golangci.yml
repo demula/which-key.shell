@@ -1,0 +1,126 @@
+run:
+  skip-dirs-use-default: false
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  forbidigo:
+    forbid:
+      - '^fmt\.Print'
+      - '^log\.'
+      - "^print$"
+      - "^println$"
+      # depguard:
+      #   rules:
+      #     main:
+      #       files:
+      #         - $all
+      #         - '!$test'
+      #       allow:
+      #         - $gostd
+      #         - github.com/demula
+      #         - github.com/aws/aws-sdk-go-v2
+      #         - github.com/aws/aws-lambda-go
+      #         - github.com/segmentio/ksuid
+      #       deny:
+      #         - pkg: "github.com/sirupsen/logrus"
+      #           desc: not allowed
+      #           # - pkg: "github.com/pkg/errors"
+      #           #   desc: Should be replaced by standard lib errors package
+      #     test:
+      #       files:
+      #         - $test
+      #       allow:
+      #         - $gostd
+      #         - github.com/demula
+      #         - github.com/aws/aws-sdk-go-v2
+      #         - github.com/aws/aws-lambda-go
+      #         - github.com/segmentio/ksuid
+      #         - github.com/stretchr/testify
+      #       deny:
+      #         - pkg: reflect
+      #           desc: please don't use reflect
+issues:
+  exclude-rules:
+    - path: 'cmd/(.+)\.go'
+      linters:
+        - forbidigo # cmd can print/log to allow user interaction
+        - gochecknoinits # cobra lib needs init() to wire subcommands
+    - path: '(.+)_mock_test\.go' # mocks don't need to check for castings
+      linters:
+        - errcheck
+        - forcetypeassert
+    - path: 'pkg/flow/ruletesting/ruletesting\.go'
+      linters:
+        - contextcheck # no need to pass context for inmemory database access
+        - nilerr # in one case is ok to have error as is expected and pass to the user as part of intended functionality
+    - path: 'pkg/standard/scenarios/(.+)\.go' # scenarios can use init to properly set ids after event creation
+      linters:
+        - gochecknoinits
+    - path: 'functions/events/(.+)\.go' # set up global state for the lambda so in subsequent invocations we save time
+      linters:
+        - gochecknoinits
+    - path: 'pkg/database/inaws/schema\.go'
+      linters:
+        - unused # as we are representing an schema in go variables it is ok for them to be unused
+    - path: 'pkg/logger/(.+)\.go'
+      linters:
+        - forbidigo # helper methods used in logger are allowed with the zap.Logger is nil
+    - path: "internal/server/aws_instrumented.go"
+      linters:
+        - contextcheck # error in the linter, closure is passing the context just fine
+        - containedctx # the context is needed to not have to reinit all the instrumentation on every request
+    - path: "pkg/instrumentation/aws/context.go" # allow limited init that cannot fail to capture env vars
+      linters:
+        - gochecknoinits
+    - path: "pkg/instrumentation/profiling.go"
+      linters:
+        - gochecknoinits # allow limited init that cannot fail to capture env vars
+        - gosec # false positive
+linters:
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - decorder
+    # - depguard
+    - dogsled
+    - errcheck
+    - execinquery
+    - exportloopref
+    - forbidigo
+    - forcetypeassert
+    - gochecknoinits
+    - gofumpt
+    - goheader
+    - goimports
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - grouper
+    - importas
+    - ineffassign
+    - interfacebloat
+    - logrlint
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - nolintlint
+    - nosprintfhostport
+    - predeclared
+    - promlinter
+    - reassign
+    - revive
+    - rowserrcheck
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unused
+    - wastedassign
+    - whitespace
+  disable-all: true

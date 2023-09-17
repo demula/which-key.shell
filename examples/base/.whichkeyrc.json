@@ -1,0 +1,17 @@
+{
+  "keybinds": {
+    "f": {
+      "desc": "Files",
+      "keybinds": {
+        "s": {
+          "desc": "Search",
+          "command": "ripgrep"
+        },
+        "f": {
+          "desc": "Fuzzy find",
+          "command": "fzf"
+        }
+      }
+    }
+  }
+}
